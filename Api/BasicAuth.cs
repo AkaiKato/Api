@@ -32,23 +32,17 @@ namespace Api
         protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
         {
             User? user;
-            try
-            {
-                var authHeader = AuthenticationHeaderValue.Parse(Request.Headers["Authorization"]);
-                var credentials = Encoding.UTF8.GetString(Convert.FromBase64String(authHeader.Parameter)).Split(":");
-                var login = credentials.FirstOrDefault();
-                var password = credentials.LastOrDefault();
 
-                user = await dataContext.Users.Include(x => x.User_state_id).Where(x => x.Login == login && x.Password == password && x.User_state_id.Code != "blocked").FirstOrDefaultAsync();
+            var authHeader = AuthenticationHeaderValue.Parse(Request.Headers["Authorization"]);
+            var credentials = Encoding.UTF8.GetString(Convert.FromBase64String(authHeader.Parameter)).Split(":");
+            var login = credentials.FirstOrDefault();
+            var password = credentials.LastOrDefault();
 
-                if (user == null)
-                {
-                    throw new ArgumentException("invalid login or password");
-                }
-            }
-            catch (Exception ex)
+            user = await dataContext.Users.Include(x => x.User_state_id).Where(x => x.Login == login && x.Password == password && x.User_state_id.Code != "blocked").FirstOrDefaultAsync();
+
+            if (user == null)
             {
-                return AuthenticateResult.Fail(ex.Message);
+                return AuthenticateResult.Fail("Not found");
             }
 
             var claims = new[]
