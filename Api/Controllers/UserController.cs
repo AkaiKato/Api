@@ -80,18 +80,15 @@ namespace Api.Controllers
             return Ok("Successfully created");
         }
 
-        [HttpDelete("userDelete")]
+        [HttpDelete("userDelete/{userId}")]
         [Authorize]
-        public async Task<IActionResult> DeleteUser([FromBody] BaseInfo baseInfo)
+        public async Task<IActionResult> DeleteUser(int userId)
         {
-            if (baseInfo == null)
-                return BadRequest();
-
-            var user = await userRepository.GetUserAsync(baseInfo.Id);
+            var user = await userRepository.GetUserAsync(userId);
             var state = await stateRepository.GetStateAsync(States.blocked.ToString());
 
             if (user == null || state == null)
-                return NotFound();
+                return NotFound("User or State is Not Found");
             
             user.User_state_id = state;
 

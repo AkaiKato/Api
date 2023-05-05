@@ -32,8 +32,9 @@ namespace Api
         protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
         {
             User? user;
-
-            var authHeader = AuthenticationHeaderValue.Parse(Request.Headers["Authorization"]);
+            if(Request.Headers == null) { return AuthenticateResult.Fail("GG"); }
+            if (!AuthenticationHeaderValue.TryParse(Request.Headers["Authorization"], out AuthenticationHeaderValue authHeader))
+                return AuthenticateResult.Fail("GG");
             var credentials = Encoding.UTF8.GetString(Convert.FromBase64String(authHeader.Parameter)).Split(":");
             var login = credentials.FirstOrDefault();
             var password = credentials.LastOrDefault();
